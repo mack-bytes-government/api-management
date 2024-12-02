@@ -64,6 +64,7 @@ This documentation provides the steps to deploy the Bicep template located at `.
 
 1. **Login to Azure**: Open your terminal and login to your Azure account using the following command:
     ```sh
+    az cloud set --name AzureUSGovernment
     az login
     ```
 
@@ -72,9 +73,54 @@ This documentation provides the steps to deploy the Bicep template located at `.
     az account set --subscription <your-subscription-id>
     ```
 
-3. **Deploy the Bicep Template**: Use the following command to deploy the Bicep template:
-    ```sh
-    az deployment group create --resource-group <your-resource-group> --template-file ./infra/main.bicep
-    ```
+3. **Set the Parameters**:  Create a file called "main.parameters.json" at the file path of "./infra/main.parameters.json."
 
-    Replace `<your-resource-group>` with the name of your resource group.
+The contents of the file should be:
+```json
+{
+  "project_prefix": {
+    "value": "myProject"
+  },
+  "env_prefix": {
+    "value": "dev"
+  },
+  "location": {
+    "value": "eastus"
+  },
+  "existing_network_name": {
+    "value": "myNetwork"
+  },
+  "vnet_rg_name": {
+    "value": "myResourceGroup"
+  },
+  "default_tag_name": {
+    "value": "environment"
+  },
+  "default_tag_value": {
+    "value": "development"
+  },
+  "api_management_admin_email": {
+    "value": "admin@example.com"
+  },
+  "api_management_publisher_name": {
+    "value": "MyPublisher"
+  },
+  "api_name": {
+    "value": "myApi"
+  },
+  "api_display_name": {
+    "value": "My API"
+  },
+  "api_path": {
+    "value": "myapi"
+  },
+  "api_service_url": {
+    "value": "https://myapi.example.com"
+  }
+}
+```
+
+4. **Deploy the Bicep Template**: Use the following command to deploy the Bicep template:
+    ```sh
+    az deployment sub create --template-file ./infra/main.bicep --parameters @./infra/main.parameters.json
+    ```
