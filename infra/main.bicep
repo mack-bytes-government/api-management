@@ -115,7 +115,7 @@ module api_management './modules/api-management.bicep' = {
     api_management_name: '${project_prefix}-${env_prefix}-apim'
     admin_email: api_management_admin_email
     publisher_name: api_management_publisher_name
-    subnet_id: existing_network.outputs.primary_subnet_id
+    subnet_id: existing_network.outputs.apim_subnet_id
     default_tag_name: default_tag_name
     default_tag_value: default_tag_value
   }

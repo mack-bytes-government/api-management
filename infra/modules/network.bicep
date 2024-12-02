@@ -12,6 +12,7 @@ param project_cidr string = '10.0.1.0/24'
 param registry_cidr string = '10.0.2.0/24'
 param key_vault_cidr string = '10.0.3.0/24'
 param storage_cidr string = '10.0.4.0/24'
+param apim_cidr string = '10.0.5.0/24'
 
 param default_tag_name string
 param default_tag_value string
@@ -34,6 +35,9 @@ resource registry_subnet 'Microsoft.Network/virtualNetworks/subnets@2023-09-01' 
   parent: virtual_network 
   properties: {
     addressPrefix: registry_cidr
+    networkSecurityGroup: {
+      id: registry_subnet_nsg.outputs.id
+    }
   }
   dependsOn: [ registry_subnet_nsg]
 }
@@ -53,6 +57,9 @@ resource key_vault_subnet 'Microsoft.Network/virtualNetworks/subnets@2023-09-01'
   parent: virtual_network 
   properties: {
     addressPrefix: key_vault_cidr
+    networkSecurityGroup: {
+      id: key_vault_subnet_nsg.outputs.id
+    }
   }
   dependsOn: [ registry_subnet, key_vault_subnet_nsg]
 }
@@ -72,6 +79,9 @@ resource storage_subnet 'Microsoft.Network/virtualNetworks/subnets@2023-09-01' =
   parent: virtual_network 
   properties: {
     addressPrefix: storage_cidr
+    networkSecurityGroup: {
+      id: storage_subnet_nsg.outputs.id
+    }
   }
   dependsOn: [ key_vault_subnet, storage_subnet_nsg]
 }
@@ -80,6 +90,28 @@ module storage_subnet_nsg './subnet-nsg.bicep' = {
   name: '${project_prefix}-${env_prefix}-storage-nsg'
   params: {
     nsg_name: '${project_prefix}-${env_prefix}-storage-nsg'
+    location: location
+    default_tag_name: default_tag_name
+    default_tag_value: default_tag_value
+  }
+}
+
+resource apim_subnet 'Microsoft.Network/virtualNetworks/subnets@2023-09-01' = {
+  name: '${project_prefix}-${env_prefix}-apim'
+  parent: virtual_network 
+  properties: {
+    addressPrefix: apim_cidr
+    networkSecurityGroup: {
+      id: apim_subnet_nsg.outputs.id
+    }
+  }
+  dependsOn: [ storage_subnet ]
+}
+
+module apim_subnet_nsg './subnet-nsg.bicep' = {
+  name: '${project_prefix}-${env_prefix}-apim-nsg'
+  params: {
+    nsg_name: '${project_prefix}-${env_prefix}-apim-nsg'
     location: location
     default_tag_name: default_tag_name
     default_tag_value: default_tag_value
@@ -95,3 +127,5 @@ output storage_subnet_id string = storage_subnet.id
 output registry_subnet_nsg_id string = registry_subnet_nsg.outputs.id
 output key_vault_subnet_nsg_id string = key_vault_subnet_nsg.outputs.id
 output storage_subnet_nsg_id string = storage_subnet_nsg.outputs.id
+output apim_subnet_id string = apim_subnet.id
+output apim_subnet_nsg_id string = apim_subnet_nsg.outputs.id

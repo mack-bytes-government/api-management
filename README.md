@@ -122,5 +122,5 @@ The contents of the file should be:
 
 4. **Deploy the Bicep Template**: Use the following command to deploy the Bicep template:
     ```sh
-    az deployment sub create --template-file ./infra/main.bicep --parameters @./infra/main.parameters.json
+    az deployment sub create --location usgovarizona --template-file ./infra/main.bicep --parameters @./infra/main.parameters.json
     ```

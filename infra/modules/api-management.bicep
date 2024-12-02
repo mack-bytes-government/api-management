@@ -10,7 +10,7 @@ resource apiManagement 'Microsoft.ApiManagement/service@2021-08-01' = {
   name: api_management_name
   location: location
   sku: {
-    name: 'Standard'
+    name: 'Developer'
     capacity: 1
   }
   properties: {
