@@ -28,6 +28,16 @@ param storage_cidr string = '10.0.4.0/24'
 param default_tag_name string
 param default_tag_value string
 
+// API Management Configuration:
+param api_management_admin_email string
+param api_management_publisher_name string
+
+// API Configuration:
+param api_name string
+param api_display_name string
+param api_path string
+param api_service_url string
+
 resource existing_rg 'Microsoft.Resources/resourceGroups@2024-07-01' existing = {
   name: vnet_rg_name
 }
@@ -94,5 +104,31 @@ module key_vault './modules/key-vault.bicep' = {
     vnet_id: existing_network.outputs.id
     default_tag_name: default_tag_name
     default_tag_value: default_tag_value
+  }
+}
+
+module api_management './modules/api-management.bicep' = {
+  name: 'api-management'
+  scope: environment_rg
+  params: {
+    location: location
+    api_management_name: '${project_prefix}-${env_prefix}-apim'
+    admin_email: api_management_admin_email
+    publisher_name: api_management_publisher_name
+    subnet_id: existing_network.outputs.primary_subnet_id
+    default_tag_name: default_tag_name
+    default_tag_value: default_tag_value
+  }
+}
+
+module api './modules/api.bicep' = {
+  name: 'api'
+  scope: environment_rg
+  params: {
+    api_management_id: api_management.outputs.id
+    api_name: api_name
+    api_display_name: api_display_name
+    api_path: api_path
+    api_service_url: api_service_url
   }
 }
