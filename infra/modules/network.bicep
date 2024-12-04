@@ -13,6 +13,7 @@ param registry_cidr string = '10.0.2.0/24'
 param key_vault_cidr string = '10.0.3.0/24'
 param storage_cidr string = '10.0.4.0/24'
 param apim_cidr string = '10.0.5.0/24'
+param app_cidr string = '10.0.6.0/24'
 
 param default_tag_name string
 param default_tag_value string
@@ -104,6 +105,14 @@ resource apim_subnet 'Microsoft.Network/virtualNetworks/subnets@2023-09-01' = {
     networkSecurityGroup: {
       id: apim_subnet_nsg.outputs.id
     }
+    serviceEndpoints: [
+      {
+        service: 'Microsoft.KeyVault'
+      }
+      {
+        service: 'Microsoft.Storage'
+      }
+    ]
   }
   dependsOn: [ storage_subnet ]
 }
@@ -112,6 +121,30 @@ module apim_subnet_nsg './subnet-nsg.bicep' = {
   name: '${project_prefix}-${env_prefix}-apim-nsg'
   params: {
     nsg_name: '${project_prefix}-${env_prefix}-apim-nsg'
+    location: location
+    default_tag_name: default_tag_name
+    default_tag_value: default_tag_value
+    enable_service_tag_key_vault: true
+    enable_service_tag_storage: true
+  }
+}
+
+resource app_subnet 'Microsoft.Network/virtualNetworks/subnets@2023-09-01' = {
+  name: '${project_prefix}-${env_prefix}-app'
+  parent: virtual_network 
+  properties: {
+    addressPrefix: app_cidr
+    networkSecurityGroup: {
+      id: app_subnet_nsg.outputs.id
+    }
+  }
+  dependsOn: [ apim_subnet ]
+}
+
+module app_subnet_nsg './subnet-nsg.bicep' = {
+  name: '${project_prefix}-${env_prefix}-app-nsg'
+  params: {
+    nsg_name: '${project_prefix}-${env_prefix}-app-nsg'
     location: location
     default_tag_name: default_tag_name
     default_tag_value: default_tag_value
@@ -129,3 +162,5 @@ output key_vault_subnet_nsg_id string = key_vault_subnet_nsg.outputs.id
 output storage_subnet_nsg_id string = storage_subnet_nsg.outputs.id
 output apim_subnet_id string = apim_subnet.id
 output apim_subnet_nsg_id string = apim_subnet_nsg.outputs.id
+output app_subnet_id string = app_subnet.id
+output app_subnet_nsg_id string = app_subnet_nsg.outputs.id

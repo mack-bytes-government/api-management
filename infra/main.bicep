@@ -107,28 +107,42 @@ module key_vault './modules/key-vault.bicep' = {
   }
 }
 
-module api_management './modules/api-management.bicep' = {
-  name: 'api-management'
+// module api_management './modules/api-management.bicep' = {
+//   name: 'api-management'
+//   scope: environment_rg
+//   params: {
+//     location: location
+//     api_management_name: '${project_prefix}-${env_prefix}-apim'
+//     admin_email: api_management_admin_email
+//     publisher_name: api_management_publisher_name
+//     subnet_id: existing_network.outputs.apim_subnet_id
+//     default_tag_name: default_tag_name
+//     default_tag_value: default_tag_value
+//   }
+// }
+
+// module api './modules/api.bicep' = {
+//   name: 'api'
+//   scope: environment_rg
+//   params: {
+//     api_management_id: api_management.outputs.id
+//     api_name: api_name
+//     api_display_name: api_display_name
+//     api_path: api_path
+//     api_service_url: api_service_url
+//   }
+// }
+
+module app_service './modules/app-service.bicep' = {
+  name: 'app-service'
   scope: environment_rg
   params: {
+    app_service_name: '${project_prefix}-${env_prefix}-app'
+    app_service_plan_name: '${project_prefix}-${env_prefix}-asp'
     location: location
-    api_management_name: '${project_prefix}-${env_prefix}-apim'
-    admin_email: api_management_admin_email
-    publisher_name: api_management_publisher_name
-    subnet_id: existing_network.outputs.apim_subnet_id
+    subnet_id: existing_network.outputs.app_subnet_id
+    vnet_id: existing_network.outputs.id
     default_tag_name: default_tag_name
     default_tag_value: default_tag_value
-  }
-}
-
-module api './modules/api.bicep' = {
-  name: 'api'
-  scope: environment_rg
-  params: {
-    api_management_id: api_management.outputs.id
-    api_name: api_name
-    api_display_name: api_display_name
-    api_path: api_path
-    api_service_url: api_service_url
   }
 }
